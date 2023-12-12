@@ -52,17 +52,17 @@ public class TaskServiceImpl implements TaskService {
             Task existingTask = optionalTask.get();
 
             if (taskUpdateDto.getStatus() != null) {
-                TaskStatus newStatus = TaskStatus.valueOf(taskUpdateDto.getStatus());
-                existingTask.setStatus(newStatus);
+                existingTask.setStatus(TaskStatus.valueOf(taskUpdateDto.getStatus()));
             }
 
             if (taskUpdateDto.getPriority() != null) {
-                TaskPriority newPriority = TaskPriority.valueOf(taskUpdateDto.getPriority());
-                existingTask.setPriority(newPriority);
+                existingTask.setPriority(TaskPriority.valueOf(taskUpdateDto.getPriority()));
             }
+
             if (taskUpdateDto.getAuthor() != null) {
                 existingTask.setAuthor(taskUpdateDto.getAuthor());
             }
+
             if (taskUpdateDto.getAssignee() != null) {
                 existingTask.setAssignee(taskUpdateDto.getAssignee());
             }
@@ -73,6 +73,7 @@ public class TaskServiceImpl implements TaskService {
             return null;
         }
     }
+
 
 
     @Override

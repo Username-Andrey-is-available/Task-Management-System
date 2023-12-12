@@ -12,4 +12,6 @@ public interface CommentService {
     Comment createComment(Comment comment);
     Comment updateComment(Long commentId, String newText);
     void deleteComment(Long commentId);
+
+    List<Comment> getAllComments();
 }

@@ -12,9 +12,17 @@ import java.util.Optional;
 @Service
 public class CommentServiceImpl implements CommentService {
 
-    @Autowired
-    private CommentRepository commentRepository;
+    private final CommentRepository commentRepository;
 
+    public CommentServiceImpl(CommentRepository commentRepository) {
+        this.commentRepository = commentRepository;
+    }
+
+
+    @Override
+    public List<Comment> getAllComments() {
+        return commentRepository.findAll();
+    }
     @Override
     public List<Comment> getCommentsByUserId(Long userId) {
         return commentRepository.findByUserId(userId);
