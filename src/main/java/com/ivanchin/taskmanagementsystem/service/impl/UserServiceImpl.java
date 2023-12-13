@@ -1,27 +1,20 @@
 package com.ivanchin.taskmanagementsystem.service.impl;
 
-import com.ivanchin.taskmanagementsystem.dto.UserUpdateDTO;
+import com.ivanchin.taskmanagementsystem.dto.UserDTO;
 import com.ivanchin.taskmanagementsystem.model.User;
 import com.ivanchin.taskmanagementsystem.repository.UserRepository;
 import com.ivanchin.taskmanagementsystem.service.UserService;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Override
     public List<User> getAllUsers() {
@@ -29,49 +22,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> getUserById(Long userId) {
-        return userRepository.findById(userId);
+    public User getUserById(Long userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        return optionalUser.orElse(null);
     }
 
     @Override
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User createUser(UserDTO userDto) {
+        User newUser = new User();
+        newUser.setEmail(userDto.getEmail());
+        newUser.setPassword(userDto.getPassword());
+        newUser.setName(userDto.getName());
+        return userRepository.save(newUser);
     }
 
     @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
-    }
-
-    @Override
-    public User updateUser(Long userId, UserUpdateDTO userUpdateDto) {
+    public User updateUser(Long userId, UserDTO userDto) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isPresent()) {
             User existingUser = optionalUser.get();
-
-            // Используем BeanUtils для копирования свойств, игнорируя null
-            BeanUtils.copyProperties(userUpdateDto, existingUser, getNullPropertyNames(userUpdateDto));
-
+            existingUser.setName(userDto.getName());
+            existingUser.setEmail(userDto.getEmail());
+            existingUser.setPassword(userDto.getPassword());
             return userRepository.save(existingUser);
         } else {
-            // Обработка случая, когда пользователя с заданным ID не существует
             return null;
         }
-    }
-
-    // Получаем список имен свойств с null значениями
-    private static String[] getNullPropertyNames(Object source) {
-        final BeanWrapper src = new BeanWrapperImpl(source);
-        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
-
-        Set<String> emptyNames = new HashSet<>();
-        for (java.beans.PropertyDescriptor pd : pds) {
-            Object srcValue = src.getPropertyValue(pd.getName());
-            if (srcValue == null) emptyNames.add(pd.getName());
-        }
-
-        String[] result = new String[emptyNames.size()];
-        return emptyNames.toArray(result);
     }
 
 

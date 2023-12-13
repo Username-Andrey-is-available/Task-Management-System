@@ -1,21 +1,18 @@
 package com.ivanchin.taskmanagementsystem.service;
 
-import com.ivanchin.taskmanagementsystem.dto.UserUpdateDTO;
+import com.ivanchin.taskmanagementsystem.dto.UserDTO;
 import com.ivanchin.taskmanagementsystem.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
     List<User> getAllUsers();
 
-    Optional<User> getUserById(Long userId);
+    User getUserById(Long userId);
 
-    Optional<User> getUserByEmail(String email);
+    User createUser(UserDTO userDto);
 
-    User createUser(User user);
-
-    User updateUser(Long userId, UserUpdateDTO userUpdateDto);
+    User updateUser(Long userId, UserDTO userDTO);
 
     void deleteUser(Long userId);
 }

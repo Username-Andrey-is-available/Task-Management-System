@@ -22,7 +22,6 @@ public class CommentController {
     private final CommentService commentService;
     private final TaskService taskService;
 
-
     @GetMapping
     public ResponseEntity<List<Comment>> getAllComments() {
         List<Comment> comments = commentService.getAllComments();
@@ -38,19 +37,16 @@ public class CommentController {
 
     @PostMapping("/tasks/{taskId}")
     public ResponseEntity<Comment> createComment(@PathVariable Long taskId, @RequestBody CommentDTO commentDTO) {
-        // Получаем задачу по taskId, предполагается, что у вас есть сервис для этого
-        Task task = taskService.getTaskById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
+        Task task = taskService.getTaskById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
 
         Comment newComment = new Comment();
         newComment.setText(commentDTO.getText());
-
-        // Устанавливаем связь с задачей
         newComment.setTask(task);
 
         Comment createdComment = commentService.createComment(newComment);
         return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
     }
-
 
     @PutMapping("/{commentId}")
     public ResponseEntity<Comment> updateComment(@PathVariable Long commentId, @RequestBody String newText) {

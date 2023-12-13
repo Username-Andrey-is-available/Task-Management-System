@@ -1,6 +1,7 @@
 package com.ivanchin.taskmanagementsystem.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -19,8 +20,8 @@ public class Comment {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "task_id")
-    @JsonBackReference
     private Task task;
 }

@@ -22,10 +22,10 @@ public class User {
     private String name;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "author", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "author")
     private List<Task> authoredTasks;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "assignee", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "assignee")
     private List<Task> assignedTasks;
 }
