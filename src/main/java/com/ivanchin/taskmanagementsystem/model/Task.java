@@ -1,5 +1,6 @@
 package com.ivanchin.taskmanagementsystem.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -31,7 +32,8 @@ public class Task {
     @JoinColumn(name = "assignee_id")
     private User assignee;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "task", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Comment> comments;
 
 }

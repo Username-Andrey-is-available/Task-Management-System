@@ -1,5 +1,6 @@
 package com.ivanchin.taskmanagementsystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,9 +21,11 @@ public class User {
 
     private String name;
 
-    @OneToMany(mappedBy = "author")
+    @JsonIgnore
+    @OneToMany(mappedBy = "author", fetch = FetchType.EAGER)
     private List<Task> authoredTasks;
 
-    @OneToMany(mappedBy = "assignee")
+    @JsonIgnore
+    @OneToMany(mappedBy = "assignee", fetch = FetchType.EAGER)
     private List<Task> assignedTasks;
 }

@@ -3,6 +3,9 @@ package com.ivanchin.taskmanagementsystem.controller;
 import com.ivanchin.taskmanagementsystem.dto.TaskDTO;
 import com.ivanchin.taskmanagementsystem.dto.TaskUpdateDTO;
 import com.ivanchin.taskmanagementsystem.model.Task;
+import com.ivanchin.taskmanagementsystem.model.TaskPriority;
+import com.ivanchin.taskmanagementsystem.model.TaskStatus;
+import com.ivanchin.taskmanagementsystem.model.User;
 import com.ivanchin.taskmanagementsystem.service.TaskService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,15 +38,41 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody TaskDTO taskDto) {
+    public ResponseEntity<Task> createTask(@RequestBody TaskDTO taskDTO) {
         Task newTask = new Task();
-        newTask.setTitle(taskDto.getTitle());
-        newTask.setDescription(taskDto.getDescription());
-        // Другие установки свойств, если необходимо
+        newTask.setTitle(taskDTO.getTitle());
+        newTask.setDescription(taskDTO.getDescription());
 
+        // Устанавливаем статус и приоритет, если они указаны в DTO
+        if (taskDTO.getStatus() != null) {
+            newTask.setStatus(TaskStatus.valueOf(taskDTO.getStatus()));
+        }
+
+        if (taskDTO.getPriority() != null) {
+            newTask.setPriority(TaskPriority.valueOf(taskDTO.getPriority()));
+        }
+
+        // Устанавливаем автора и исполнителя, если они указаны в DTO
+        if (taskDTO.getAuthor() != null) {
+            // Предполагается, что taskDTO.getAuthor() возвращает объект UserDTO
+            User author = new User();
+            author.setId(taskDTO.getAuthor().getId());
+            newTask.setAuthor(author);
+        }
+
+        if (taskDTO.getAssignee() != null) {
+            // Предполагается, что taskDTO.getAssignee() возвращает объект UserDTO
+            User assignee = new User();
+            assignee.setId(taskDTO.getAssignee().getId());
+            newTask.setAssignee(assignee);
+        }
+
+        // Создаем задачу
         Task createdTask = taskService.createTask(newTask);
+
         return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
     }
+
 
     @PutMapping("/{taskId}")
     public ResponseEntity<Task> updateTask(@PathVariable Long taskId, @RequestBody TaskUpdateDTO taskUpdateDto) {

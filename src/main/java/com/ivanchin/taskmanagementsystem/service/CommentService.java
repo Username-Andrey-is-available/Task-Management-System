@@ -7,10 +7,15 @@ import java.util.Optional;
 
 public interface CommentService {
     List<Comment> getCommentsByUserId(Long userId);
+
     List<Comment> getCommentsByTaskId(Long taskId);
+
     Optional<Comment> getCommentById(Long commentId);
+
     Comment createComment(Comment comment);
+
     Comment updateComment(Long commentId, String newText);
+
     void deleteComment(Long commentId);
 
     List<Comment> getAllComments();

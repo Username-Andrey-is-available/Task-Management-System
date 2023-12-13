@@ -1,8 +1,12 @@
 package com.ivanchin.taskmanagementsystem.controller;
 
 import com.ivanchin.taskmanagementsystem.dto.CommentDTO;
+import com.ivanchin.taskmanagementsystem.exception.ResourceNotFoundException;
 import com.ivanchin.taskmanagementsystem.model.Comment;
+import com.ivanchin.taskmanagementsystem.model.Task;
 import com.ivanchin.taskmanagementsystem.service.CommentService;
+import com.ivanchin.taskmanagementsystem.service.TaskService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,13 +16,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/comments")
+@RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
+    private final TaskService taskService;
 
-    public CommentController(CommentService commentService) {
-        this.commentService = commentService;
-    }
 
     @GetMapping
     public ResponseEntity<List<Comment>> getAllComments() {
@@ -33,15 +36,21 @@ public class CommentController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping
-    public ResponseEntity<Comment> createComment(@RequestBody CommentDTO commentDTO) {
+    @PostMapping("/tasks/{taskId}")
+    public ResponseEntity<Comment> createComment(@PathVariable Long taskId, @RequestBody CommentDTO commentDTO) {
+        // Получаем задачу по taskId, предполагается, что у вас есть сервис для этого
+        Task task = taskService.getTaskById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
+
         Comment newComment = new Comment();
         newComment.setText(commentDTO.getText());
-        // Другие установки свойств, если необходимо
+
+        // Устанавливаем связь с задачей
+        newComment.setTask(task);
 
         Comment createdComment = commentService.createComment(newComment);
         return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
     }
+
 
     @PutMapping("/{commentId}")
     public ResponseEntity<Comment> updateComment(@PathVariable Long commentId, @RequestBody String newText) {
