@@ -9,6 +9,7 @@ import com.ivanchin.taskmanagementsystem.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class CommentController {
     private final TaskService taskService;
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<Comment>> getAllComments() {
         List<Comment> comments = commentService.getAllComments();
         return new ResponseEntity<>(comments, HttpStatus.OK);

@@ -14,6 +14,7 @@ import java.util.Optional;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
+
     @Override
     public List<Comment> getAllComments() {
         return commentRepository.findAll();

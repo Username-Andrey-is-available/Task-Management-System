@@ -5,6 +5,7 @@ import com.ivanchin.taskmanagementsystem.model.User;
 import com.ivanchin.taskmanagementsystem.repository.UserRepository;
 import com.ivanchin.taskmanagementsystem.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +16,8 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
 
     @Override
     public List<User> getAllUsers() {
@@ -31,8 +34,9 @@ public class UserServiceImpl implements UserService {
     public User createUser(UserDTO userDto) {
         User newUser = new User();
         newUser.setEmail(userDto.getEmail());
-        newUser.setPassword(userDto.getPassword());
+        newUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
         newUser.setName(userDto.getName());
+        newUser.setRole(userDto.getRole());
         return userRepository.save(newUser);
     }
 
@@ -44,6 +48,7 @@ public class UserServiceImpl implements UserService {
             existingUser.setName(userDto.getName());
             existingUser.setEmail(userDto.getEmail());
             existingUser.setPassword(userDto.getPassword());
+            existingUser.setRole(userDto.getRole());
             return userRepository.save(existingUser);
         } else {
             return null;

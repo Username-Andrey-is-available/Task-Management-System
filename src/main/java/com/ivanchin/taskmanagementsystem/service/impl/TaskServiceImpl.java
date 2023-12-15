@@ -29,21 +29,16 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Task createTask(Task task) {
-        // Логика создания задачи, если нужно
         return taskRepository.save(task);
     }
 
     @Override
     public Task updateTask(Long taskId, TaskDTO taskDTO) {
-        // Логика обновления задачи, если нужно
         Optional<Task> optionalTask = taskRepository.findById(taskId);
         if (optionalTask.isPresent()) {
             Task existingTask = optionalTask.get();
-            // Обновляем поля задачи согласно TaskUpdateDTO
             existingTask.setTitle(taskDTO.getTitle());
             existingTask.setDescription(taskDTO.getDescription());
-            // ... другие поля ...
-
             return taskRepository.save(existingTask);
         } else {
             return null;
