@@ -3,6 +3,7 @@ package com.ivanchin.taskmanagementsystem.controller;
 import com.ivanchin.taskmanagementsystem.dto.TaskDTO;
 import com.ivanchin.taskmanagementsystem.model.Task;
 import com.ivanchin.taskmanagementsystem.service.TaskService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,13 +14,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/tasks")
+@RequiredArgsConstructor
 public class TaskController {
 
     private final TaskService taskService;
 
-    public TaskController(TaskService taskService) {
-        this.taskService = taskService;
-    }
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
@@ -34,6 +33,27 @@ public class TaskController {
         return task.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    @GetMapping("/for/{email}")
+    public ResponseEntity<?> getTaskByAssignee(@PathVariable String email) {
+        List<Task> tasks = taskService.getAllTasksFor(email);
+        if (tasks != null && !tasks.isEmpty()) {
+            return new ResponseEntity<>(tasks, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("No tasks found for assignee: " + email, HttpStatus.OK);
+        }
+    }
+
+    @GetMapping("/from/{email}")
+    public ResponseEntity<?> getTaskByAuthor(@PathVariable String email) {
+        List<Task> tasks = taskService.getAllTasksFrom(email);
+        if (tasks != null && !tasks.isEmpty()) {
+            return new ResponseEntity<>(tasks, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("No tasks found from author: " + email, HttpStatus.OK);
+        }
+    }
+
 
     @PostMapping
     public ResponseEntity<Task> createTask(@RequestBody Task task) {

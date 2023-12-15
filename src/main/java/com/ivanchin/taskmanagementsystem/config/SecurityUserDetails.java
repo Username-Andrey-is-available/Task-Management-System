@@ -15,6 +15,7 @@ public class SecurityUserDetails implements UserDetails {
     public SecurityUserDetails(User user) {
         this.user = user;
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Arrays.stream(user.getRole().split(", "))

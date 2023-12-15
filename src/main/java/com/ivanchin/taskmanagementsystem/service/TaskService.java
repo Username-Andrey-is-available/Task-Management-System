@@ -17,4 +17,8 @@ public interface TaskService {
     Task updateTask(Long taskId, TaskDTO taskDTO);
 
     void deleteTask(Long taskId);
+
+    List<Task> getAllTasksFrom(String email);
+
+    List<Task> getAllTasksFor(String email);
 }

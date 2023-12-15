@@ -1,6 +1,5 @@
 package com.ivanchin.taskmanagementsystem.service;
 
-import com.ivanchin.taskmanagementsystem.dto.CommentDTO;
 import com.ivanchin.taskmanagementsystem.model.Comment;
 
 import java.util.List;
