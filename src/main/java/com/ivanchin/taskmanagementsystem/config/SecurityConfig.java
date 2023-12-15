@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 
 @Configuration
 @EnableWebSecurity
@@ -41,6 +42,8 @@ public class SecurityConfig {
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
+
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -61,9 +63,10 @@ public class TaskController {
         return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{taskId}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long taskId, @RequestBody TaskDTO taskDTO) {
-        Task updatedTask = taskService.updateTask(taskId, taskDTO);
+    @PatchMapping("/{taskId}")
+    public ResponseEntity<Task> updateTask(@PathVariable Long taskId, @RequestBody TaskDTO taskDTO,
+    @AuthenticationPrincipal UserDetails userDetails) {
+        Task updatedTask = taskService.updateTask(taskId, taskDTO, userDetails);
         if (updatedTask != null) {
             return new ResponseEntity<>(updatedTask, HttpStatus.OK);
         } else {
@@ -77,3 +80,4 @@ public class TaskController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
+

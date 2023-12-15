@@ -2,6 +2,7 @@ package com.ivanchin.taskmanagementsystem.service;
 
 import com.ivanchin.taskmanagementsystem.dto.TaskDTO;
 import com.ivanchin.taskmanagementsystem.model.Task;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +15,7 @@ public interface TaskService {
 
     Task createTask(Task task);
 
-    Task updateTask(Long taskId, TaskDTO taskDTO);
+    Task updateTask(Long taskId, TaskDTO taskDTO, UserDetails userDetails);
 
     void deleteTask(Long taskId);
 

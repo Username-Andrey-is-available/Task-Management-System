@@ -36,6 +36,17 @@ public class UserController {
         }
     }
 
+    @GetMapping("/by-name/{userName}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    public ResponseEntity<User> getUserByName(@PathVariable String userName) {
+        User user = userService.getUserByName(userName);
+        if (user != null) {
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
     @PostMapping("/registration")
     public ResponseEntity<User> createUser(@RequestBody UserDTO userDto) {
         User createdUser = userService.createUser(userDto);
@@ -43,6 +54,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<User> updateUser(@PathVariable Long userId, @RequestBody UserDTO userDto) {
         User updatedUser = userService.updateUser(userId, userDto);
         if (updatedUser != null) {
