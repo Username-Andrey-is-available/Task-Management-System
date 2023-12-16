@@ -1,4 +1,7 @@
-FROM ubuntu:latest
-LABEL authors="y6ryr"
+FROM openjdk:17-jre
 
-ENTRYPOINT ["top", "-b"]
+WORKDIR /app
+
+COPY build/libs/Task-Management-System-0.0.1-SNAPSHOT.jar app.jar
+
+CMD ["java", "-jar", "app.jar"]
