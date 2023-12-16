@@ -43,8 +43,8 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public Comment updateComment(Long commentId, String newText, UserDetails userDetails) {
         Comment comment = commentRepository.findById(commentId).orElseThrow();
-        if (comment.getUser().getId() != userRepository.findByName(userDetails.getUsername())
-                .orElseThrow().getId()) {
+        if (!comment.getUser().getId().equals(userRepository.findByName(userDetails.getUsername())
+                .orElseThrow().getId())) {
             throw new UnauthorizedTaskStatusChangeException
                     ("User does not have permission to update a comment");
         } else {

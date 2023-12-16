@@ -3,7 +3,6 @@ package com.ivanchin.taskmanagementsystem.controller;
 import com.ivanchin.taskmanagementsystem.dto.CommentDTO;
 import com.ivanchin.taskmanagementsystem.model.Comment;
 import com.ivanchin.taskmanagementsystem.service.CommentService;
-import com.ivanchin.taskmanagementsystem.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommentController {
     private final CommentService commentService;
-    private final TaskService taskService;
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
