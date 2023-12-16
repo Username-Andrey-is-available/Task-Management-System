@@ -1,35 +1,28 @@
-version: '3'
+version: '3.8'
 services:
-  mysql:
-    image: mysql:latest
-    container_name: task_management_mysql
+  db:
+    image: mysql:5.7
     environment:
-      MYSQL_ROOT_PASSWORD: ryuqerb524543GGRWEHR
-      MYSQL_DATABASE: task_management
-      MYSQL_USER: root
-      MYSQL_PASSWORD: ryuqerb524543GGRWEHR
+      MYSQL_DATABASE: 'task_manager'
+      MYSQL_USER: 'task_manager'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'rootpassword'
     ports:
       - "3306:3306"
-    networks:
-      - task_management_network
+    volumes:
+      - db-data:/var/lib/mysql
+    restart: always
 
-  task-management-system:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: task_management_app
+  app:
+    build: .
     ports:
       - "8080:8080"
-    depends_on:
-      - mysql
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/task_management
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: ryuqerb524543GGRWEHR
-      SPRING_PROFILES_ACTIVE: dev
-    networks:
-      - task_management_network
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/task_manager
+      SPRING_DATASOURCE_USERNAME: task_manager
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      - db
 
-networks:
-  task_management_network:
-    driver: bridge
+volumes:
+  db-data:
