@@ -9,6 +9,5 @@ public class TaskDTO {
     private String description;
     private String status;
     private String priority;
-    private UserDTO author;
-    private UserDTO assignee;
+    private String assignee;
 }

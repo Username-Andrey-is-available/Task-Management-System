@@ -14,10 +14,8 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
 
     @Override
     public List<User> getAllUsers() {
@@ -42,23 +40,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updateUser(Long userId, UserDTO userDto) {
-        Optional<User> optionalUser = userRepository.findById(userId);
-        if (optionalUser.isPresent()) {
-            User existingUser = optionalUser.get();
+        User existingUser = userRepository.findById(userId).orElseThrow();
+        if (userDto.getName() != null) {
             existingUser.setName(userDto.getName());
-            existingUser.setEmail(userDto.getEmail());
-            existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
-            existingUser.setRole(userDto.getRole());
-            return userRepository.save(existingUser);
-        } else {
-            return null;
         }
+
+        if (userDto.getEmail() != null) {
+            existingUser.setEmail(userDto.getEmail());
+        }
+
+        if (userDto.getPassword() != null) {
+            existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        }
+
+        if (userDto.getRole() != null) {
+            existingUser.setRole(userDto.getRole());
+        }
+        return userRepository.save(existingUser);
     }
 
     @Override
     public User getUserByName(String userName) {
-        Optional<User> user = userRepository.findByName(userName);
-        return user.get();
+        return userRepository.findByName(userName).orElseThrow();
     }
 
     @Override

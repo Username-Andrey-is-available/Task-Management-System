@@ -13,21 +13,15 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(unique = true)
     private String email;
-
     private String password;
-
     private String role;
-
     @Column(unique = true)
     private String name;
-
     @JsonIgnore
     @OneToMany(mappedBy = "author")
     private List<Task> authoredTasks;
-
     @JsonIgnore
     @OneToMany(mappedBy = "assignee")
     private List<Task> assignedTasks;

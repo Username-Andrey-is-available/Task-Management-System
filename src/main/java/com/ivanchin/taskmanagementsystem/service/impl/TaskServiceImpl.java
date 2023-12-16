@@ -1,6 +1,8 @@
 package com.ivanchin.taskmanagementsystem.service.impl;
 
 import com.ivanchin.taskmanagementsystem.dto.TaskDTO;
+import com.ivanchin.taskmanagementsystem.exception.UnauthorizedAccessException;
+import com.ivanchin.taskmanagementsystem.exception.UnauthorizedTaskStatusChangeException;
 import com.ivanchin.taskmanagementsystem.model.Task;
 import com.ivanchin.taskmanagementsystem.model.TaskPriority;
 import com.ivanchin.taskmanagementsystem.model.TaskStatus;
@@ -8,6 +10,7 @@ import com.ivanchin.taskmanagementsystem.model.User;
 import com.ivanchin.taskmanagementsystem.repository.TaskRepository;
 import com.ivanchin.taskmanagementsystem.repository.UserRepository;
 import com.ivanchin.taskmanagementsystem.service.TaskService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -19,7 +22,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
-
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
 
@@ -34,36 +36,56 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task createTask(Task task) {
+    public Task createTask(TaskDTO taskDTO, UserDetails userDetails) {
+        Task task = new Task();
+        task.setAuthor(userRepository.findByName(userDetails.getUsername()).orElseThrow());
+        task.setAssignee(userRepository.findByName(taskDTO.getAssignee()).orElseThrow());
+        if (taskDTO.getStatus() != null) {
+            task.setStatus(TaskStatus.valueOf(taskDTO.getStatus()));
+        }
+
+        if (taskDTO.getDescription() != null) {
+            task.setDescription(taskDTO.getDescription());
+        }
+
+        if (taskDTO.getPriority() != null) {
+            task.setPriority(TaskPriority.valueOf(taskDTO.getPriority()));
+        }
+
+        if (taskDTO.getTitle() != null) {
+            task.setTitle(taskDTO.getTitle());
+        }
         return taskRepository.save(task);
     }
 
     @Override
     public Task updateTask(Long taskId, TaskDTO taskDTO, UserDetails userDetails) {
-        Optional<Task> optionalTask = taskRepository.findById(taskId);
-        if (optionalTask.isPresent()) {
-            Task existingTask = optionalTask.get();
-            Optional<User> user = userRepository.findByName(userDetails.getUsername());
-            if (user.isPresent()) {
-                if (existingTask.getAssignee().getId() == user.get().getId()) {
-                    existingTask.setStatus(TaskStatus.valueOf(taskDTO.getStatus()));
-                }
-                if (existingTask.getAuthor().getId() == user.get().getId()) {
-                    if (taskDTO.getPriority() != null) {
-                        existingTask.setPriority(TaskPriority.valueOf(taskDTO.getPriority()));
-                    }
-                    if(taskDTO.getTitle() != null){
-                        existingTask.setTitle(taskDTO.getTitle());
+        Task task = taskRepository.findById(taskId).orElseThrow(() ->
+                new EntityNotFoundException("Task not found"));
+        User user = userRepository.findByName(userDetails.getUsername()).orElseThrow(() ->
+                new EntityNotFoundException("User not found"));
 
-                    }
-                    if(taskDTO.getDescription() != null) {
-                        existingTask.setDescription(taskDTO.getDescription());
-                    }
-                }
-            }
-            return taskRepository.save(existingTask);
+        if (task.getAuthor().getId() != user.getId()) {
+            throw new UnauthorizedTaskStatusChangeException("User does not have permission to update the task");
         } else {
-            return null;
+            try {
+                if (taskDTO.getPriority() != null) {
+                    task.setPriority(TaskPriority.valueOf(taskDTO.getPriority()));
+                }
+                if (taskDTO.getDescription() != null) {
+                    task.setDescription(taskDTO.getDescription());
+                }
+                if (taskDTO.getTitle() != null) {
+                    task.setTitle(taskDTO.getTitle());
+                }
+                if (taskDTO.getAssignee() != null) {
+                    task.setAssignee(userRepository.findByName(taskDTO.getAssignee()).orElseThrow());
+                }
+
+                return taskRepository.save(task);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid task update");
+            }
         }
     }
 
@@ -82,9 +104,37 @@ public class TaskServiceImpl implements TaskService {
                 .orElse(Collections.emptyList());
     }
 
+    @Override
+    public void deleteTask(Long taskId, UserDetails userDetails) {
+        User user = userRepository.findByName(userDetails.getUsername()).
+                orElseThrow();
+        if (user.getRole().equals("ROLE_ADMIN") ||
+                taskRepository.findById(taskId).orElseThrow().
+                        getAuthor().getId() == user.getId()) {
+            taskRepository.deleteById(taskId);
+        } else {
+            throw new UnauthorizedAccessException
+                    ("User is not the author of the task and does not have the right to delete it");
+        }
+    }
 
     @Override
-    public void deleteTask(Long taskId) {
-        taskRepository.deleteById(taskId);
+    public Task changeStatus(Long taskId, TaskDTO taskDTO, UserDetails userDetails) {
+        Task task = taskRepository.findById(taskId).orElseThrow(() ->
+                new EntityNotFoundException("Task not found"));
+        User user = userRepository.findByName(userDetails.getUsername()).orElseThrow(() ->
+                new EntityNotFoundException("User not found"));
+
+        if (task.getAssignee().getId() != user.getId()) {
+            throw new UnauthorizedTaskStatusChangeException
+                    ("User does not have permission to change the task status");
+        } else {
+            try {
+                task.setStatus(TaskStatus.valueOf(taskDTO.getStatus()));
+                return taskRepository.save(task);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid task status");
+            }
+        }
     }
 }

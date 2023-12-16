@@ -1,6 +1,7 @@
 package com.ivanchin.taskmanagementsystem.controller;
 
 import com.ivanchin.taskmanagementsystem.dto.TaskDTO;
+import com.ivanchin.taskmanagementsystem.exception.UnauthorizedAccessException;
 import com.ivanchin.taskmanagementsystem.model.Task;
 import com.ivanchin.taskmanagementsystem.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -12,15 +13,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/tasks")
 @RequiredArgsConstructor
 public class TaskController {
-
     private final TaskService taskService;
-
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
@@ -31,8 +29,7 @@ public class TaskController {
 
     @GetMapping("/{taskId}")
     public ResponseEntity<Task> getTaskById(@PathVariable Long taskId) {
-        Optional<Task> task = taskService.getTaskById(taskId);
-        return task.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+        return taskService.getTaskById(taskId).map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -56,28 +53,66 @@ public class TaskController {
         }
     }
 
-
     @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody Task task) {
-        Task createdTask = taskService.createTask(task);
-        return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
+    public ResponseEntity<Task> createTask(@RequestBody TaskDTO taskDTO,
+                                           @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            if (taskDTO == null || userDetails == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            return new ResponseEntity<>(
+                    taskService.createTask(taskDTO, userDetails),
+                    HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PatchMapping("/{taskId}")
     public ResponseEntity<Task> updateTask(@PathVariable Long taskId, @RequestBody TaskDTO taskDTO,
-    @AuthenticationPrincipal UserDetails userDetails) {
-        Task updatedTask = taskService.updateTask(taskId, taskDTO, userDetails);
-        if (updatedTask != null) {
-            return new ResponseEntity<>(updatedTask, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                                           @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            if (taskDTO == null || userDetails == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            return new ResponseEntity<>(
+                    taskService.updateTask(taskId, taskDTO, userDetails),
+                    HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/{taskId}")
+    public ResponseEntity<Task> changeStatus(@PathVariable long taskId, @RequestBody TaskDTO taskDTO,
+                                             @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            if (taskDTO == null || userDetails == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            return new ResponseEntity<>(
+                    taskService.changeStatus(taskId, taskDTO, userDetails),
+                    HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/{taskId}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long taskId) {
-        taskService.deleteTask(taskId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<Void> deleteTask(@PathVariable Long taskId,
+                                           @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            taskService.deleteTask(taskId, userDetails);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (UnauthorizedAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 }
 

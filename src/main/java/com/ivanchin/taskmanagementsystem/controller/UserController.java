@@ -15,7 +15,6 @@ import java.util.List;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
-
     private final UserService userService;
 
     @GetMapping
@@ -53,7 +52,7 @@ public class UserController {
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{userId}")
+    @PatchMapping("/{userId}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<User> updateUser(@PathVariable Long userId, @RequestBody UserDTO userDto) {
         User updatedUser = userService.updateUser(userId, userDto);
@@ -63,7 +62,6 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
 
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
